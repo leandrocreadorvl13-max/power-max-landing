@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Power Max · Energía de 400 ML</title>
+<meta name="description" content="Power Max: bebida energética de 400 ML en cuatro sabores. Cafeína pura, rendimiento extremo.">
+<meta name="theme-color" content="#050505">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23050505'/><text x='50' y='72' font-size='64' text-anchor='middle' fill='%2322C55E'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config = { theme: { extend: {
+  colors: { ink: '#050505', volt: '#22C55E' },
+  fontFamily: { display: ['Anton','Impact','sans-serif'], mono: ['JetBrains Mono','ui-monospace','monospace'], body: ['Archivo','system-ui','sans-serif'] }
+}}};
+</script>
+<style>
+  :root { --spring: cubic-bezier(.34,1.56,.64,1); --out: cubic-bezier(.16,1,.3,1); }
+  html { background:#050505; scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+  body { background:#050505; color:#fff; font-family:'Archivo',system-ui,sans-serif; overflow-x:hidden;
+         padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right); }
+  ::selection { background:#22C55E; color:#050505; }
+  :focus-visible { outline:2px solid #22C55E; outline-offset:3px; }
+
+  /* Rejilla industrial + ruido */
+  .grid-bg { background-image:
+      linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size:64px 64px;
+    -webkit-mask-image:linear-gradient(#000 40%, transparent); mask-image:linear-gradient(#000 40%, transparent); }
+  .noise { position:fixed; inset:0; pointer-events:none; z-index:60; opacity:.09; mix-blend-mode:screen;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+
+  .display { font-family:'Anton',Impact,sans-serif; text-transform:uppercase; line-height:.86; letter-spacing:-.01em; }
+  .outline { color:transparent; -webkit-text-stroke:2px #fff; }
+
+  /* Entrada del hero: una sola secuencia al cargar */
+  @keyframes rise { from { transform:translateY(110%); } to { transform:none; } }
+  @keyframes fadein { from { opacity:0; transform:scale(.94); } to { opacity:1; transform:none; } }
+  .mask { display:block; overflow:hidden; padding-bottom:.04em; }
+  .mask > span { display:block; animation:rise 1s var(--out) both; animation-delay:var(--d,0s); }
+  .enter { animation:fadein 1.2s var(--out) both; animation-delay:var(--d,0s); }
+  @keyframes float { 50% { transform:translateY(-14px); } }
+  .float { animation:float 6s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity:.55; transform:scale(1.08); } }
+  .glow { animation:pulse 4s ease-in-out infinite; }
+
+  /* Marquesinas */
+  @keyframes marquee { to { transform:translateX(-50%); } }
+  .track { display:flex; width:max-content; animation:marquee 28s linear infinite; }
+  .track.rev { animation-direction:reverse; animation-duration:40s; }
+  .strip:hover .track { animation-play-state:paused; }
+
+  /* Botón con resorte: responde al instante, rebota al soltar */
+  .btn { position:relative; display:inline-flex; align-items:center; justify-content:center; gap:.75rem;
+    min-height:56px; padding:0 2rem; background:#22C55E; color:#050505; font-family:'JetBrains Mono',monospace;
+    font-weight:700; letter-spacing:.06em; text-transform:uppercase; touch-action:manipulation;
+    clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    transition:transform .55s var(--spring), background .2s, filter .2s; -webkit-tap-highlight-color:transparent; }
+  .btn:hover { background:#fff; transform:scale(1.04); }
+  .btn:active { transform:scale(.92); transition-duration:.08s; }
+  .btn.ghost { background:transparent; color:#fff; box-shadow:inset 0 0 0 2px #fff; clip-path:none; }
+  .btn.ghost:hover { background:#fff; color:#050505; }
+
+  /* Tarjetas con brillo que sigue al cursor */
+  .card { position:relative; background:#0a0a0a; border:1px solid rgba(255,255,255,.18); overflow:hidden;
+    transition:transform .5s var(--spring), border-color .25s; --x:50%; --y:50%; }
+  .card::before { content:""; position:absolute; inset:0; opacity:0; transition:opacity .3s; pointer-events:none;
+    background:radial-gradient(360px circle at var(--x) var(--y), rgba(34,197,94,.28), transparent 60%); }
+  .card:hover { transform:translateY(-4px); border-color:#22C55E; }
+  .card:hover::before { opacity:1; }
+  .card > * { position:relative; }
+  .card:active { transform:scale(.98); transition-duration:.08s; }
+
+  /* Paneles de sabores */
+  .flavors { display:flex; flex-direction:column; gap:6px; height:min(640px, 120vw); }
+  .flv { position:relative; flex:1; min-height:0; overflow:hidden; background:#0a0a0a; text-align:left; cursor:pointer;
+    transition:flex .7s var(--out); border:1px solid rgba(255,255,255,.18); -webkit-tap-highlight-color:transparent; }
+  .flv.on { flex:5; border-color:#22C55E; }
+  .flv img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.45; transform:scale(1.04);
+    transition:opacity .5s, transform .9s var(--out); }
+  .flv.on img, .flv:hover img { opacity:1; transform:scale(1); }
+  .flv .lab { position:absolute; left:1rem; bottom:.75rem; font-size:clamp(2rem,6vw,3.5rem); }
+  .flv .tag { position:absolute; left:1rem; top:.75rem; font-family:'JetBrains Mono',monospace; font-size:.75rem; color:#22C55E; }
+  @media (min-width:768px) {
+    .flavors { flex-direction:row; height:min(640px, 72vh); }
+    .flv .lab { writing-mode:vertical-rl; transform:rotate(180deg); left:auto; right:1rem; bottom:1rem; }
+  }
+
+  /* Galería */
+  .shot { overflow:hidden; background:#0a0a0a; border:1px solid rgba(255,255,255,.18); }
+  .shot img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .8s var(--out); }
+  .shot:hover img { transform:scale(1.03); }
+
+  /* Barra móvil: respeta el indicador de inicio */
+  .dock { position:fixed; left:0; right:0; bottom:0; z-index:50; padding:.75rem 1rem calc(.75rem + env(safe-area-inset-bottom));
+    background:rgba(5,5,5,.92); backdrop-filter:blur(8px); border-top:1px solid rgba(255,255,255,.18); }
+  @media (min-width:768px) { .dock { display:none; } }
+  @media (max-width:767px) { body { padding-bottom:calc(88px + env(safe-area-inset-bottom)); } }
+
+  img { max-width:100%; }
+  .img-off { opacity:0 !important; }
+  @media (prefers-reduced-motion:reduce) {
+    *, *::before, *::after { animation-duration:.001s !important; animation-iteration-count:1 !important; transition-duration:.001s !important; }
+    .track { animation:none; }
+  }
+</style>
+</head>
+<body>
+<div class="noise" aria-hidden="true"></div>
+
+<!-- NAV -->
+<header class="fixed top-0 inset-x-0 z-50 mix-blend-difference" style="padding-top:env(safe-area-inset-top)">
+  <div class="flex items-center justify-between px-5 md:px-10 h-16">
+    <a href="#top" class="display text-2xl tracking-wide">Power<span class="text-volt">Max</span></a>
+    <nav class="hidden md:flex gap-8 font-mono text-sm uppercase">
+      <a href="#formula" class="hover:text-volt transition-colors">Fórmula</a>
+      <a href="#sabores" class="hover:text-volt transition-colors">Sabores</a>
+      <a href="#accion" class="hover:text-volt transition-colors">En acción</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<!-- HERO -->
+<section class="relative min-h-[100svh] overflow-hidden flex flex-col justify-end pt-24">
+  <div class="absolute inset-0 grid-bg" aria-hidden="true"></div>
+  <div class="absolute right-[-20%] md:right-[8%] top-[8%] w-[90vw] md:w-[46vw] aspect-square rounded-full bg-volt/25 blur-[110px] glow" aria-hidden="true"></div>
+
+  <!-- Lata -->
+  <div class="enter absolute right-[-6%] md:right-[6%] top-[9%] w-[68%] md:w-[34%] max-w-[520px] float" style="--d:.5s">
+    <img src="Portada.jpg" alt="Lata de Power Max rodeada de salpicaduras de agua" class="w-full h-auto"
+         style="-webkit-mask-image:radial-gradient(closest-side, #000 62%, transparent 100%); mask-image:radial-gradient(closest-side, #000 62%, transparent 100%)">
+  </div>
+
+  <div class="relative px-5 md:px-10 pb-40 md:pb-44">
+    <p class="font-mono text-xs md:text-sm text-volt mb-4 enter" style="--d:.1s">Bebida energética · 400 ML</p>
+    <h1 class="display text-[26vw] md:text-[17vw] lg:text-[15rem]">
+      <span class="mask"><span style="--d:.15s">Power</span></span>
+      <span class="mask md:ml-[14vw]"><span class="outline" style="--d:.3s">Max</span></span>
+    </h1>
+    <div class="mt-8 flex flex-col sm:flex-row sm:items-end gap-8 sm:gap-14 enter" style="--d:.8s">
+      <p class="max-w-sm text-lg leading-snug text-white/90">Cafeína pura para cuando el día no da tregua. Abre la lata y sube el volumen.</p>
+      <div class="flex gap-6 font-mono">
+        <div><div class="text-4xl font-bold" data-count="400">400</div><div class="text-xs text-white/70">ML</div></div>
+        <div><div class="text-4xl font-bold text-volt" data-count="160">160</div><div class="text-xs text-white/70">MG CAFEÍNA</div></div>
+        <div><div class="text-4xl font-bold" data-count="4">4</div><div class="text-xs text-white/70">SABORES</div></div>
+      </div>
+      <a href="#comprar" class="btn self-start">Comprar ahora</a>
+    </div>
+  </div>
+
+  <!-- Marquesinas cruzadas -->
+  <div class="absolute bottom-6 md:bottom-10 left-[-5vw] w-[110vw] rotate-[-3deg] strip bg-volt text-ink" aria-hidden="true">
+    <div class="track font-mono font-bold text-base md:text-xl py-3 uppercase whitespace-nowrap" data-marquee data-text="400ML • CAFEÍNA PURA • RENDIMIENTO EXTREMO • "></div>
+  </div>
+  <div class="absolute bottom-0 left-[-5vw] w-[110vw] rotate-[2deg] strip border-y border-white/30 bg-ink/80" aria-hidden="true">
+    <div class="track rev display text-3xl md:text-5xl py-1 outline whitespace-nowrap" data-marquee data-text="SIN FRENOS • POWER MAX • SIN FRENOS • POWER MAX • "></div>
+  </div>
+</section>
+
+<!-- FÓRMULA -->
+<section id="formula" class="px-5 md:px-10 py-24 md:py-36">
+  <div class="grid md:grid-cols-12 gap-10 md:gap-6">
+    <h2 class="display text-6xl md:text-8xl md:col-span-7">Fórmula<br>de choque</h2>
+    <p class="md:col-span-4 md:col-start-9 self-end text-white/80 text-lg">Cuatro activos, una sola lata. Valores de ejemplo: reemplázalos por los de tu etiqueta oficial.</p>
+  </div>
+  <div class="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-3" id="cards">
+    <article class="card p-6 min-h-[280px] flex flex-col justify-between" tabindex="0">
+      <span class="font-mono text-volt text-sm">CAFEÍNA</span>
+      <div><div class="display text-7xl">160<span class="text-2xl font-mono"> mg</span></div><p class="mt-3 text-white/80">Foco inmediato y energía que se siente desde el primer sorbo.</p></div>
+    </article>
+    <article class="card p-6 min-h-[280px] flex flex-col justify-between" tabindex="0">
+      <span class="font-mono text-volt text-sm">TAURINA</span>
+      <div><div class="display text-7xl">1000<span class="text-2xl font-mono"> mg</span></div><p class="mt-3 text-white/80">Apoyo para el rendimiento cuando el ritmo no baja.</p></div>
+    </article>
+    <article class="card p-6 min-h-[280px] flex flex-col justify-between" tabindex="0">
+      <span class="font-mono text-volt text-sm">VITAMINAS B</span>
+      <div><div class="display text-7xl">B6<span class="text-2xl font-mono"> + B12</span></div><p class="mt-3 text-white/80">Complejo B que acompaña el metabolismo energético.</p></div>
+    </article>
+    <article class="card p-6 min-h-[280px] flex flex-col justify-between" tabindex="0">
+      <span class="font-mono text-volt text-sm">GUARANÁ</span>
+      <div><div class="display text-7xl">200<span class="text-2xl font-mono"> mg</span></div><p class="mt-3 text-white/80">Extracto natural para una energía sostenida.</p></div>
+    </article>
+  </div>
+</section>
+
+<!-- SABORES -->
+<section id="sabores" class="px-5 md:px-10 pb-24 md:pb-36">
+  <h2 class="display text-6xl md:text-8xl mb-10 md:ml-[20vw]">Elige tu <span class="outline">voltaje</span></h2>
+  <div class="flavors" id="flavors">
+    <button class="flv on" aria-pressed="true"><img src="Cereza.jpg" alt="Power Max sabor cereza"><span class="tag">Sabor</span><span class="lab display">Cereza</span></button>
+    <button class="flv" aria-pressed="false"><img src="Hielo.jpg" alt="Power Max sabor hielo"><span class="tag">Sabor</span><span class="lab display">Hielo</span></button>
+    <button class="flv" aria-pressed="false"><img src="Limon.jpg" alt="Power Max sabor limón"><span class="tag">Sabor</span><span class="lab display">Limón</span></button>
+    <button class="flv" aria-pressed="false"><img src="Mango.jpg" alt="Power Max sabor mango"><span class="tag">Sabor</span><span class="lab display">Mango</span></button>
+  </div>
+</section>
+
+<!-- EN ACCIÓN -->
+<section id="accion" class="px-5 md:px-10 pb-24 md:pb-36">
+  <div class="grid md:grid-cols-12 gap-6 mb-10">
+    <h2 class="display text-6xl md:text-8xl md:col-span-8">Sin<br>frenos</h2>
+  </div>
+  <div class="grid grid-cols-2 md:grid-cols-12 gap-3 md:h-[620px]">
+    <div class="shot md:col-span-3 aspect-[3/4] md:aspect-auto"><img src="1%20power.jpg" alt="Persona sosteniendo una lata de Power Max"></div>
+    <div class="shot md:col-span-5 aspect-[3/4] md:aspect-auto md:mt-16"><img src="2%20power.jpg" alt="Persona con gafas oscuras sentada con Power Max"></div>
+    <div class="shot md:col-span-4 col-span-2 aspect-[4/3] md:aspect-auto"><img src="4%20power.jpg" alt="Persona en cuclillas mostrando la lata Power Max"></div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="comprar" class="relative overflow-hidden px-5 md:px-10 py-28 md:py-44 border-t border-white/20">
+  <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[80vw] aspect-square rounded-full bg-volt/15 blur-[120px] glow" aria-hidden="true"></div>
+  <div class="relative">
+    <h2 class="display text-[20vw] md:text-[14vw]">Abre.<br><span class="text-volt">Rinde.</span></h2>
+    <div class="mt-10 flex flex-col sm:flex-row gap-4 sm:items-center">
+      <a href="#" class="btn">Comprar ahora</a>
+      <a href="#sabores" class="btn ghost">Ver sabores</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="px-5 md:px-10 py-8 border-t border-white/20 font-mono text-xs text-white/70 flex flex-col sm:flex-row justify-between gap-2">
+  <span>© 2026 POWER MAX</span>
+  <span>Consumo moderado. No recomendado para menores de edad ni embarazadas.</span>
+</footer>
+
+<div class="dock"><a href="#comprar" class="btn w-full">Comprar ahora</a></div>
+
+<script>
+// Marquesinas: duplica el texto para el bucle infinito
+document.querySelectorAll('[data-marquee]').forEach(el => {
+  const t = el.dataset.text.repeat(6);
+  el.innerHTML = '<span class="px-0">' + t + '</span><span aria-hidden="true">' + t + '</span>';
+});
+
+// Acordeón de sabores (hover en escritorio, toque en móvil, teclado incluido)
+const flv = [...document.querySelectorAll('.flv')];
+const activate = b => flv.forEach(x => { const on = x === b; x.classList.toggle('on', on); x.setAttribute('aria-pressed', on); });
+flv.forEach(b => {
+  b.addEventListener('click', () => activate(b));
+  b.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') activate(b); });
+});
+
+// Brillo que sigue al cursor
+document.querySelectorAll('.card').forEach(c => c.addEventListener('pointermove', e => {
+  const r = c.getBoundingClientRect();
+  c.style.setProperty('--x', (e.clientX - r.left) + 'px');
+  c.style.setProperty('--y', (e.clientY - r.top) + 'px');
+}));
+
+// Contadores del hero (una vez, al cargar)
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const end = +el.dataset.count, t0 = performance.now() + 700, dur = 1400;
+    el.textContent = '0';
+    const tick = now => {
+      const p = Math.min(Math.max((now - t0) / dur, 0), 1);
+      el.textContent = Math.round(end * (1 - Math.pow(1 - p, 4)));
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+// Si una imagen no carga, se oculta sin romper el diseño
+document.querySelectorAll('img').forEach(i => i.addEventListener('error', () => i.classList.add('img-off')));
+</script>
+</body>
+</html>
